@@ -1,0 +1,19 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID:-}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+        NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION:-}
+        NEXT_PUBLIC_YANDEX_VERIFICATION: ${NEXT_PUBLIC_YANDEX_VERIFICATION:-}
+    env_file: .env
+    environment:
+      HOSTNAME: 0.0.0.0
+      LEADS_LOG_FILE: /app/data/leads.jsonl
+    ports:
+      - "127.0.0.1:3000:3000"   # faqat Nginx orqali ochiq
+    volumes:
+      - ./data:/app/data        # arizalar zaxirasi konteyner o'chsa ham saqlanadi
+    restart: unless-stopped

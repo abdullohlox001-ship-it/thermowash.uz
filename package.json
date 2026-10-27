@@ -1,0 +1,34 @@
+{
+  "name": "thermowash",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && node scripts/postbuild.mjs",
+    "start": "node .next/standalone/server.js",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "start:next": "next start -p ${PORT:-3000}"
+  },
+  "dependencies": {
+    "@fontsource-variable/onest": "5.3.1",
+    "@supabase/supabase-js": "^2.118.0",
+    "next": "15.5.25",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "3.4.19",
+    "typescript": "^5.6"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

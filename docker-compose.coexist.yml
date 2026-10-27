@@ -1,0 +1,43 @@
+# THERMOWASH — mavjud Nginx konteyneri bor serverga qo'shilish uchun ("coexist" rejimi).
+#
+#   docker compose -f docker-compose.coexist.yml up -d --build
+#   docker compose -f docker-compose.coexist.yml ps
+#   docker compose -f docker-compose.coexist.yml logs -f
+#   docker compose -f docker-compose.coexist.yml down
+#
+# Port ochilmaydi: Nginx konteyneri bir xil tarmoqda bo'lgani uchun
+# unga "http://thermowash:3000" manzili orqali murojaat qiladi.
+# Qiymatlar .env faylidan olinadi (deploy/install.sh uni o'zi yaratadi).
+
+services:
+  thermowash:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?NEXT_PUBLIC_SITE_URL .env faylida ko'rsatilishi shart}
+        NEXT_PUBLIC_GTM_ID: ${NEXT_PUBLIC_GTM_ID:-}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+        NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION:-}
+        NEXT_PUBLIC_YANDEX_VERIFICATION: ${NEXT_PUBLIC_YANDEX_VERIFICATION:-}
+    image: thermowash:latest
+    container_name: thermowash
+    env_file: .env
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      LEADS_LOG_FILE: /app/data/leads.jsonl
+    volumes:
+      - ./data:/app/data          # arizalar zaxirasi (konteyner o'chsa ham saqlanadi)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/uz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks: [web]
+
+networks:
+  web:
+    external: true
+    name: ${DOCKER_NETWORK:-maktab_default}   # nginx konteyneri turgan tarmoq
