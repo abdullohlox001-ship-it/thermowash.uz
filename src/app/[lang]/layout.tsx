@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { LANGS, getDict, isLang, langMeta } from "@/lib/i18n";
 import { business, isPlaceholderPhone, phoneDisplay, phoneHref, siteUrl } from "@/config/business";
 import { requestServiceOptions } from "@/content/services";
-import { jsonLd, localBusinessSchema } from "@/lib/seo";
+import { jsonLd, localBusinessSchema, organizationSchema } from "@/lib/seo";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileBottomBar from "@/components/MobileBottomBar";
@@ -111,6 +111,7 @@ export default async function LangLayout({ children, params }: { children: React
           <MobileBottomBar call={t.bottomBar.call} request={t.bottomBar.request} phoneHref={phoneHref} />
         </RequestProvider>
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(localBusinessSchema(lang))} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(organizationSchema(lang))} />
         <ClickTracker />
         <Analytics />
       </body>

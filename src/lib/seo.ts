@@ -8,14 +8,18 @@ export const keywords: Record<Lang, string[]> = {
     "kotyol ustasi", "usta kotyol", "kotyol ta'mirlash", "kotyol tamirlash", "kotyol o'rnatish", "kotyol remont",
     "kotel ustasi", "kotel remont", "katyol usta", "katyol remont", "isitish qozoni ustasi", "qozon ustasi",
     "isitish tizimi", "kotyol xizmatlari", "gaz kotyol ta'mirlash", "kotyol diagnostika",
-    "isitish tizimini yuvish", "kotyol yuvish", "promivka", "isitish promivka", "boyler tozalash", "quyqa tozalash", "thermowash", "котёл устаси", "котел уста",
+    "isitish tizimini yuvish", "kotyol yuvish", "promivka", "isitish promivka", "boyler tozalash", "quyqa tozalash",
+    "kotyol ustasi Toshkent", "kotyol ta'mirlash Toshkent", "radiator yuvish",
+    "thermowash", "котёл устаси", "котел уста",
   ],
   ru: [
     "мастер по котлам", "котёл мастер", "ремонт котла", "ремонт котлов", "ремонт газового котла", "ремонт газовых котлов",
     "установка котла", "обслуживание котла", "обслуживание котлов", "ремонт отопления", "мастер по отоплению",
     "котёл не работает", "котел не включается", "котельщик", "ремонт котла на дому",
     "промывка системы отопления", "промывка котла", "промывка теплообменника", "промывка радиаторов",
-    "чистка котла от накипи", "чистка бойлера", "удаление накипи", "промывка отопления Ташкент", "thermowash",
+    "чистка котла от накипи", "чистка бойлера", "удаление накипи",
+    "ремонт котлов Ташкент", "мастер по котлам Ташкент", "обслуживание газовых котлов", "промывка отопления Ташкент",
+    "thermowash",
   ],
 };
 
@@ -30,6 +34,8 @@ export function buildMetadata(opts: {
   /** til prefiksisiz yo'l, masalan "/services/x". Har bir til uchun alohida. */
   paths?: Partial<Record<Lang, string>>;
   noindex?: boolean;
+  /** Sahifaga xos kalit so'zlar (global keywords ga qo'shiladi) */
+  extraKeywords?: string[];
 }): Metadata {
   const { lang, title, description } = opts;
   const paths: Record<Lang, string> = { uz: "", ru: "", ...opts.paths };
@@ -38,10 +44,14 @@ export function buildMetadata(opts: {
   for (const l of LANGS) languages[langMeta[l].htmlLang] = localizedUrl(l, paths[l]);
   languages["x-default"] = localizedUrl("uz", paths.uz);
 
+  const pageKeywords = opts.extraKeywords
+    ? [...keywords[lang], ...opts.extraKeywords]
+    : keywords[lang];
+
   return {
     title,
     description,
-    keywords: keywords[lang],
+    keywords: pageKeywords,
     alternates: { canonical: url, languages },
     robots: opts.noindex ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
@@ -60,6 +70,15 @@ export function buildMetadata(opts: {
 
 /* ------------------- JSON-LD ------------------- */
 
+/** Toshkent uchun GeoCoordinates va City schema */
+function citySchema(lang: Lang) {
+  return {
+    "@type": "City",
+    name: business.city[lang],
+    "@id": "https://www.wikidata.org/wiki/Q269",
+  };
+}
+
 export function localBusinessSchema(lang: Lang) {
   const b = business;
   const schema: Record<string, unknown> = {
@@ -74,8 +93,8 @@ export function localBusinessSchema(lang: Lang) {
     logo: `${siteUrl}/icon.png`,
     inLanguage: langMeta[lang].htmlLang,
     areaServed: b.serviceArea
-      ? b.serviceArea[lang]
-      : { "@type": "City", name: b.city[lang] },
+      ? { "@type": "AdministrativeArea", name: b.serviceArea[lang] }
+      : citySchema(lang),
     openingHoursSpecification: b.workingHours.schema.map((h) => ({
       "@type": "OpeningHoursSpecification",
       dayOfWeek: h.days.map((d) => `https://schema.org/${dayName(d)}`),
@@ -83,19 +102,27 @@ export function localBusinessSchema(lang: Lang) {
       closes: h.closes,
     })),
     knowsLanguage: ["uz", "ru"],
+    priceRange: "$$",
+    currenciesAccepted: "UZS",
   };
   if (b.address) {
     schema.address = {
       "@type": "PostalAddress",
       streetAddress: b.address.street[lang],
       addressLocality: b.city[lang],
+      addressRegion: b.city[lang],
       addressCountry: "UZ",
       ...(b.address.postalCode ? { postalCode: b.address.postalCode } : {}),
     };
     if (b.address.lat && b.address.lng)
       schema.geo = { "@type": "GeoCoordinates", latitude: b.address.lat, longitude: b.address.lng };
   } else {
-    schema.address = { "@type": "PostalAddress", addressLocality: b.city[lang], addressCountry: "UZ" };
+    schema.address = {
+      "@type": "PostalAddress",
+      addressLocality: b.city[lang],
+      addressRegion: b.city[lang],
+      addressCountry: "UZ",
+    };
   }
   if (b.mapsUrl) schema.hasMap = b.mapsUrl;
   const sameAs = [...b.socials, ...b.telegrams.map((u) => `https://t.me/${u}`)];
@@ -109,7 +136,29 @@ function dayName(d: string) {
   )[d];
 }
 
+export function organizationSchema(lang: Lang) {
+  const b = business;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
+    name: b.name[lang],
+    url: siteUrl,
+    telephone: b.phone,
+    logo: `${siteUrl}/icon.png`,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: b.phone,
+      contactType: "customer service",
+      areaServed: "UZ",
+      availableLanguage: ["uz", "ru"],
+    },
+    sameAs: [...b.socials, ...b.telegrams.map((u) => `https://t.me/${u}`)],
+  };
+}
+
 export function faqSchema(items: { q: string; a: string }[]) {
+  if (!items.length) return null;
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -130,7 +179,9 @@ export function serviceSchema(lang: Lang, name: string, description: string, url
     url,
     serviceType: name,
     provider: { "@id": `${siteUrl}/#business` },
-    areaServed: business.serviceArea ? business.serviceArea[lang] : business.city[lang],
+    areaServed: business.serviceArea
+      ? { "@type": "AdministrativeArea", name: business.serviceArea[lang] }
+      : citySchema(lang),
   };
 }
 
@@ -144,5 +195,6 @@ export function breadcrumbSchema(items: { name: string; url: string }[]) {
 
 /** JSON-LD ni xavfsiz serializatsiya (</script> injeksiyasidan himoya) */
 export function jsonLd(data: unknown) {
+  if (!data) return { __html: "" };
   return { __html: JSON.stringify(data).replace(/</g, "\\u003c") };
 }

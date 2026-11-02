@@ -1,3 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -8,6 +13,7 @@ const securityHeaders = [
 
 const nextConfig = {
   output: "standalone",
+  outputFileTracingRoot: __dirname,
   poweredByHeader: false,
   reactStrictMode: true,
   compress: true,

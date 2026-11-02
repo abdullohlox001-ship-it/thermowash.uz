@@ -13,6 +13,12 @@ ARG NEXT_PUBLIC_GTM_ID=
 ARG NEXT_PUBLIC_GA_ID=
 ARG NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
 ARG NEXT_PUBLIC_YANDEX_VERIFICATION=
+# NEXT_PUBLIC_SITE_URL majburiy — localhost sitemap/robots'ga chiqmaslik uchun
+RUN if [ -z "$NEXT_PUBLIC_SITE_URL" ]; then \
+      echo "XATO: NEXT_PUBLIC_SITE_URL build-arg berilmagan!" >&2; \
+      echo "  docker build --build-arg NEXT_PUBLIC_SITE_URL=https://thermowash.uz ..." >&2; \
+      exit 1; \
+    fi && echo "NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL"
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID \
     NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID \

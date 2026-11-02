@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getDict, isLang, type Lang } from "@/lib/i18n";
 import { business, phoneDisplay } from "@/config/business";
 import { faq } from "@/content/home";
-import { buildMetadata, faqSchema, jsonLd } from "@/lib/seo";
+import { buildMetadata, breadcrumbSchema, faqSchema, jsonLd, localizedUrl } from "@/lib/seo";
 import Hero from "@/components/sections/Hero";
 import Services from "@/components/sections/Services";
 import Problems from "@/components/sections/Problems";
@@ -18,8 +18,8 @@ import Contact from "@/components/sections/Contact";
 
 const meta: Record<Lang, (city: string, name: string) => { title: string; description: string }> = {
   uz: (city, name) => ({
-    title: `Kotyol ustasi ${city}da — ta’mirlash, o‘rnatish, yuvish | ${name}`,
-    description: `Kotyol (kotel) ta’mirlash, o‘rnatish va diagnostika, isitish tizimini yuvish (promivka), boyler tozalash. Gaz va elektr kotyollar. 24/7, Toshkentning barcha tumanlari. Kafolat. Tel: ${phoneDisplay}`,
+    title: `Kotyol ustasi ${city}da — ta'mirlash, o'rnatish, yuvish | ${name}`,
+    description: `Kotyol (kotel) ta'mirlash, o'rnatish va diagnostika, isitish tizimini yuvish (promivka), boyler tozalash. Gaz va elektr kotyollar. 24/7, Toshkentning barcha tumanlari. Kafolat. Tel: ${phoneDisplay}`,
   }),
   ru: (city, name) => ({
     title: `Мастер по котлам — ремонт, установка и промывка, ${city} | ${name}`,
@@ -38,6 +38,11 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
   const { lang: l } = await params;
   const lang = l as Lang;
   const t = getDict(lang);
+
+  const homeBreadcrumb = breadcrumbSchema([
+    { name: t.nav.home, url: localizedUrl(lang) },
+  ]);
+
   return (
     <>
       <Hero lang={lang} t={t} />
@@ -53,6 +58,7 @@ export default async function Home({ params }: { params: Promise<{ lang: string 
       <FAQ t={t} items={faq[lang]} />
       <Contact lang={lang} t={t} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(faqSchema(faq[lang]))} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(homeBreadcrumb)} />
     </>
   );
 }

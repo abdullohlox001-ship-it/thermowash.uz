@@ -93,7 +93,25 @@ export const telegramHref = telegramLinks[0]?.href ?? null;
 export const phone2Display = business.phone2 ? formatPhone(business.phone2) : null;
 export const phone2Href = business.phone2 ? `tel:${business.phone2}` : null;
 
-export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+/**
+ * Asosiy production URL — barcha SEO ma'lumotlari (sitemap.xml, robots.txt,
+ * canonical, Open Graph, Schema.org) uchun rasmiy domen.
+ * 
+ * HECH QACHON localhost bo'lishi mumkin emas!
+ */
+export const CANONICAL_SITE_URL = "https://thermowash.uz";
+
+function resolveSiteUrl(): string {
+  const env = (process.env.NEXT_PUBLIC_SITE_URL || "").trim().replace(/\/$/, "");
+  // Agar muhit o'zgaruvchisida haqiqiy tashqi domen berilgan bo'lsa (localhost bo'lmasa)
+  if (env && !env.includes("localhost") && !env.includes("127.0.0.1")) {
+    return env;
+  }
+  // Barcha boshqa holatlarda qat'iy asosiy domen ishlatiladi
+  return CANONICAL_SITE_URL;
+}
+
+export const siteUrl = resolveSiteUrl();
 
 /** Placeholder telefon hali almashtirilmaganmi? (dev ogohlantirish uchun) */
 export const isPlaceholderPhone = (business.phone as string) === "+998900000000";
