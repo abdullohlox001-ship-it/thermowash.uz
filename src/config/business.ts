@@ -26,10 +26,10 @@ export const business = {
    * ASOSIY TELEFON. Faqat raqamlar, +998 bilan.
    * Hamma joyda (header, hero, pastki panel, footer, schema) avtomatik ishlatiladi.
    */
-  phone: "+998914580202",
+  phone: "+998778107007",
 
   /** Qo'shimcha telefon (ixtiyoriy) */
-  phone2: "+998993853402" as string | null,
+  phone2: "+998772117007" as string | null,
 
   /** Telegram username'lar (@ belgisisiz). Birinchisi — asosiy "Telegramda yozish" tugmasi. [] = ko'rsatilmaydi */
   telegrams: ["autocheck_uz", "idrisov_jasurbek"] as string[],
